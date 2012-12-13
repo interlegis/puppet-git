@@ -1,4 +1,5 @@
-define git::reset($localtree = "/srv/git/", $real_name = false, $clean = true) {
+define git::reset($localtree = '/srv/git/', $real_name = false, $clean = true,
+  $user='') {
 
     #
     # Resource to reset changes in a working directory
@@ -10,18 +11,30 @@ define git::reset($localtree = "/srv/git/", $real_name = false, $clean = true) {
     # files)
     #
 
-    exec { "git_reset_exec_$name":
-        cwd => $real_name ? {
-            false => "$localtree/$name",
-            default => "$localtree/$real_name"
-        },
-        command => "git reset --hard HEAD"
+    if $user == '' {
+      exec { "git_reset_exec_$name":
+          cwd     => $real_name ? {
+              false   => "$localtree/$name",
+              default => "$localtree/$real_name"
+          },
+          command => 'git reset --hard HEAD'
+      }
+    }
+    else {
+      exec { "git_reset_exec_$name":
+          cwd     => $real_name ? {
+              false   => "$localtree/$name",
+              default => "$localtree/$real_name"
+          },
+          command => "sudo -u $user git reset --hard HEAD"
+      }
     }
 
     if $clean {
-        git::clean { "$name":
-            localtree => "$localtree",
-            real_name => "$real_name"
+        git::clean { $name:
+            localtree => $localtree,
+            real_name => $real_name,
+            user      => $user
         }
     }
 }

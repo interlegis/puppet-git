@@ -1,6 +1,6 @@
 define git::repository(  $public = false, $shared = false,
-                    $localtree = "/srv/git/", $owner = "root",
-                    $group = "root", $symlink_prefix = false,
+                    $localtree = '/srv/git/', $owner = 'root',
+                    $group = 'root', $symlink_prefix = false,
                     $prefix = false, $recipients = false,
                     $description = false) {
     # FIXME
@@ -34,33 +34,33 @@ define git::repository(  $public = false, $shared = false,
     include git::server
 
     file { "git_repository_$name":
-        path => $prefix ? {
-            false => "$localtree/$name",
-            default => "$localtree/$prefix-$name"
+        path   => $prefix ? {
+            false   => "$localtree/$name",
+            default => "$localtree/${prefix}-${name}"
         },
         ensure => directory,
-        owner => "$owner",
-        group => "$group",
-        mode => $public ? {
-            true => $shared ? {
-                true => 2775,
-                default => 0755
+        owner  => $owner,
+        group  => $group,
+        mode   => $public ? {
+            true    => $shared ? {
+                true    => '2775',
+                default => '0755'
             },
             default => $shared ? {
-                true => 2770,
-                default => 0750
+                true    => '2770',
+                default => '0750'
             }
         }
     }
 
     # Set the hook for this repository
     file { "git_repository_hook_post-commit_$name":
-        path => $prefix ? {
-            false => "$localtree/$name/hooks/post-commit",
-            default => "$localtree/$prefix-$name/hooks/post-commit"
+        path    => $prefix ? {
+            false   => "$localtree/$name/hooks/post-commit",
+            default => "$localtree/${prefix}-${name}/hooks/post-commit"
         },
-        source => "puppet://$server/git/post-commit",
-        mode => 755,
+        source  => "puppet://$::server/git/post-commit",
+        mode    => 755,
         require => [
             File["git_repository_$name"],
             Exec["git_init_script_$name"]
@@ -68,11 +68,11 @@ define git::repository(  $public = false, $shared = false,
     }
 
     file { "git_repository_hook_update_$name":
-        path => $prefix ? {
-            false => "$localtree/$name/hooks/update",
-            default => "$localtree/$prefix-$name/hooks/update"
+        path    => $prefix ? {
+            false   => "$localtree/$name/hooks/update",
+            default => "$localtree/${prefix}-${name}/hooks/update"
         },
-        ensure => "$localtree/$name/hooks/post-commit",
+        ensure  => "$localtree/$name/hooks/post-commit",
         require => [
             File["git_repository_$name"],
             Exec["git_init_script_$name"]
@@ -80,13 +80,13 @@ define git::repository(  $public = false, $shared = false,
     }
 
     file { "git_repository_hook_post-update_$name":
-        path => $prefix ? {
-            false => "$localtree/$name/hooks/post-update",
-            default => "$localtree/$prefix-$name/hooks/post-update"
+        path    => $prefix ? {
+            false   => "$localtree/$name/hooks/post-update",
+            default => "$localtree/${prefix}-${name}/hooks/post-update"
         },
-        mode => 755,
-        owner => "$owner",
-        group => "$group",
+        mode    => 755,
+        owner   => $owner,
+        group   => $group,
         require => [
             File["git_repository_$name"],
             Exec["git_init_script_$name"]
@@ -98,9 +98,9 @@ define git::repository(  $public = false, $shared = false,
         false: {}
         default: {
             file { "git_repository_commit_list_$name":
-                path => $prefix ? {
-                    false => "$localtree/$name/commit-list",
-                    default => "$localtree/$prefix-$name/commit-list"
+                path    => $prefix ? {
+                    false   => "$localtree/$name/commit-list",
+                    default => "$localtree/${prefix}-${name}/commit-list"
                 },
                 content => template('git/commit-list.erb'),
                 require => [
@@ -115,11 +115,11 @@ define git::repository(  $public = false, $shared = false,
         false: {}
         default: {
             file { "git_repository_description_$name":
-                path => $prefix ? {
-                    false => "$localtree/$name/description",
-                    default => "$localtree/$prefix-$name/description"
+                path    => $prefix ? {
+                    false   => "$localtree/$name/description",
+                    default => "$localtree/${prefix}-${name}/description"
                 },
-                content => "$description",
+                content => $description,
                 require => [
                     File["git_repository_$name"],
                     Exec["git_init_script_$name"]
@@ -130,16 +130,20 @@ define git::repository(  $public = false, $shared = false,
 
     exec { "git_init_script_$name":
         command => $prefix ? {
-            false => "git_init_script --localtree $localtree --name $name --shared $shared --public $public --owner $owner --group $group",
-            default => "git_init_script --localtree $localtree --name $prefix-$name --shared $shared --public $public --owner $owner --group $group"
+            false   => "git_init_script --localtree $localtree
+  --name $name --shared $shared --public $public --owner $owner
+  --group $group",
+            default => "git_init_script --localtree $localtree
+  --name ${prefix}-${name} --shared $shared --public $public --owner $owner
+  --group $group"
         },
         creates => $prefix ? {
-            false => "$localtree/$name/info",
-            default => "$localtree/$prefix-$name"
+            false   => "$localtree/$name/info",
+            default => "$localtree/${prefix}-${name}"
         },
         require => [
             File["git_repository_$name"],
-            File["/usr/local/bin/git_init_script"]
+            File['/usr/local/bin/git_init_script']
         ]
     }
 }

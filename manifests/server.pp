@@ -7,15 +7,15 @@ class git::server inherits git::client {
     # service is running
     #
 
-    package { "git-daemon-run":
+    package { 'git-daemon-run':
         ensure => installed
     }
 
     #service { "git":
-    #    enable => true,
-    #    ensure => running,
+    #    enable  => true,
+    #    ensure  => running,
     #    require => Package["git-daemon-run"],
-    #    notify => Service["xinetd"]
+    #    notify  => Service["xinetd"]
     #}
 
     #service { "xinetd":
@@ -23,19 +23,19 @@ class git::server inherits git::client {
     #    ensure => running
     #}
 
-    file { "/srv/git/":
+    file { '/srv/git/':
         ensure => directory,
-        mode => 755
+        mode   => '0755'
     }
 
-    file { "/usr/local/bin/git_init_script":
-        owner => "root",
-        group => "root",
-        mode => 750,
+    file { '/usr/local/bin/git_init_script':
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0750',
         source => [
             #"puppet://$server/private/$domain/git/git_init_script",
             #"puppet://$server/files/git/git_init_script",
-            "puppet://$server/git/git_init_script"
+            "puppet://$::server/git/git_init_script"
         ]
     }
 }

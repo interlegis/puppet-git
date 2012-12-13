@@ -1,4 +1,4 @@
-define git::clean($localtree = "/srv/git/", $real_name = false) {
+define git::clean($localtree = '/srv/git/', $real_name = false, $user = '') {
 
     #
     # Resource to clean out a working directory
@@ -6,12 +6,22 @@ define git::clean($localtree = "/srv/git/", $real_name = false) {
     # have added files. This resource is applied for all pull resources,
     # by default.
     #
-
-    exec { "git_clean_exec_$name":
-        cwd => $real_name ? {
-            false => "$localtree/$name",
-            default => "$localtree/$real_name"
-        },
-        command => "git clean -d -f"
+    if $user == '' {
+      exec { "git_clean_exec_$name":
+          cwd     => $real_name ? {
+              false   => "$localtree/$name",
+              default => "$localtree/$real_name"
+          },
+          command => 'git clean -d -f'
+      }
+    }
+    else {
+      exec { "git_clean_exec_$name":
+          cwd     => $real_name ? {
+              false   => "$localtree/$name",
+              default => "$localtree/$real_name"
+          },
+          command => "sudo -u $user git clean -d -f"
+      }
     }
 }
