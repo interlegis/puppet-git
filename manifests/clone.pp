@@ -20,6 +20,7 @@ define git::clone(   $source,
           cwd     => $localtree,
           command => "git clone $source $_name",
           creates => "$localtree/$_name/.git/",
+	  require => Class["git::client"],
       }
 
       case $branch {
@@ -28,7 +29,8 @@ define git::clone(   $source,
               exec { "git_clone_checkout_${branch}_${localtree}/${_name}":
                   cwd     => "$localtree/$_name",
                   command => "git checkout --track -b $branch origin/$branch",
-                  creates => "$localtree/$_name/.git/refs/heads/$branch"
+                  creates => "$localtree/$_name/.git/refs/heads/$branch",
+	  	  require => Class["git::client"],
               }
           }
       }
@@ -37,7 +39,8 @@ define git::clone(   $source,
           cwd     => $localtree,
           command => "sudo -u $user git clone $source $_name",
           creates => "$localtree/$_name/.git/",
-          timeout => 0
+          timeout => 0,
+	  require => Class["git::client"],
       }
 
       case $branch {
@@ -49,7 +52,8 @@ define git::clone(   $source,
                   creates => "$localtree/$_name/.git/refs/heads/$branch",
                   user    => $user,
                   require => User[$user],
-                  timeout => 0
+                  timeout => 0,
+	 	  require => Class["git::client"],
               }
           }
       }
