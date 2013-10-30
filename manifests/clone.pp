@@ -1,8 +1,13 @@
+#clone.pp
+
 define git::clone(   $source,
                 $localtree = '/srv/git/',
                 $real_name = false,
                 $branch = false,
                 $user = '') {
+
+    include git::client
+
     if $real_name {
         $_name = $real_name
     }
